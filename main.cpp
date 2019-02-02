@@ -20,6 +20,7 @@ struct stru_cliente{
 	int hotelReserva[10];
 	int nReserva = 0;
 
+
 };
 
 struct stru_hoteles{
@@ -130,9 +131,8 @@ int reserva( int &reg, int &poscl){
 	time_t tAct = time(NULL);
 	fecha=asctime(localtime(&tAct));
 
-	ofstream archivo;
+	ofstream archivo,archivo1;
 	archivo.open("proyecto.txt",ios::app);
-
 	CodigoHotel:
 	if (verCupo(reg)) {
 		mostrarHoteles(reg);
@@ -153,10 +153,13 @@ int reserva( int &reg, int &poscl){
 			cout<<"Confirmar reserva? (s/n): "; cin>>p;
 			if (p == 's') {
 				cout<<"Reserva a nombre de "<< Z[usuarioActual].cliente[usuarioActual].nombre<< " confirmada";
-				//ARCHIVO
+				//
 				nombre = Z[usuarioActual].cliente[usuarioActual].nombre;
+				archivo1.open(nombre,ios::app);
 				hotel = Z[sitio].hotel[sitio].nombre;
 				archivo<<"NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<" |FECHA DE RESERVACION: "<<fecha<<endl;
+				archivo.close();
+				archivo1<<"|HOTEL: "<<hotel<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo.close();
 				//
 				Z[usuarioActual].cliente[usuarioActual].hotelReserva[Z[usuarioActual].cliente[usuarioActual].nReserva] = op;
@@ -196,26 +199,20 @@ int reserva( int &reg, int &poscl){
 }
 
 void reservasUsuario(){
-	cout<<"\t TUS RESERVAS"<<endl;
-	if(Z[usuarioActual].cliente[usuarioActual].nReserva != 0){
-		cout<<Z[usuarioActual].cliente[usuarioActual].nReserva<<endl;
-		for (int i = 0, n = 0; n < Z[usuarioActual].cliente[usuarioActual].nReserva ; i++) {
-			//cout<<i<<endl;
-			if (Z[usuarioActual].cliente[usuarioActual].hotelReserva[i] == Z[i].hotel[i].codigo) {
-				cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre;
-				cout<<endl;
-				n++;
-			}
-
-		}
-	}
-	else{
-		cout<<"No tienes reservas"<<endl;
-	}
+	string line,nombre;
+	ifstream archivo;
+	nombre=Z[usuarioActual].cliente[usuarioActual].nombre;
+	archivo.open(nombre, ios::in);
+	while ( getline (archivo,line) )
+	    {
+	      cout << line << endl;
+	    }
+	    archivo.close();
 }
 
 void registro(){
 	char nombre[40], contrasena[20]; int edad;
+	ofstream archivo;
 	Reintentar:
 	cout<<"\t REGISTRO"<<endl;
 	cout<<"Tu nombre: "; cin>>nombre;
@@ -231,6 +228,8 @@ void registro(){
 			else{
 			  strcpy(Z[poscl].cliente[poscl].nombre, nombre);
 				strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
+				archivo.open(nombre,ios::out);
+				archivo<<"\t Historial de resevaciones"<<endl;
 				Z[poscl].cliente[poscl].codigo += 1;
 				poscl++;
 				regus++;
@@ -241,6 +240,8 @@ void registro(){
 	else{
 		strcpy(Z[poscl].cliente[poscl].nombre, nombre);
 	  strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
+		archivo.open(nombre,ios::out);
+		archivo<<"\t Historial de resevaciones"<<endl;
 		Z[poscl].cliente[poscl].codigo += 1;
 		poscl++;
 		regus++;
@@ -300,7 +301,7 @@ void menu(){
 				break;
 			}
 			case 4:{
-				//historial();
+				historial();
 				break;
 			}
 
