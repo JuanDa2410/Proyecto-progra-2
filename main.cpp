@@ -12,7 +12,7 @@
 using namespace std;
 
 bool estadoSesion, admin;
-int poscl = 0, regus = 0, usuarioActual, reg = 0,  posht = 0;
+int poscl = 0, regus = 0, usuarioActual, reg = 0,  posht = 0, posvac = 0;
 
 void dibujar(){
 	cout<< "\t*******************************************************\n";
@@ -31,6 +31,7 @@ struct stru_cliente{
 	char contrasena[20];
 	int codigo;
 	int hotelReserva[10];
+	int habitacion[10];
 	int nReserva;
 	int noches[10];
 
@@ -40,8 +41,11 @@ struct stru_cliente{
 struct stru_hoteles{
 	int codigo;
 	char nombre[20];
-	int vacantes;
+	int cantidadVacantes;
+	int vacantes[20];
 	bool cupo;
+	char ciudad[20];
+	int estrellas;
 };
 
 struct stru_factura{
@@ -53,17 +57,23 @@ struct stru_factura{
 stru_factura Z[100];
 
 
+
 void historial(){
+	int cont=0;
 	string line;
 	ifstream archivo;
-	archivo.open("proyecto.txt" , ios::in);
+	archivo.open("historial.txt" , ios::in);
 	while ( getline (archivo,line) )
 	    {
 	      cout << line << endl;
 	    }
+	    if(cont<1){
+		cout<<"\t NO HAY RESERVAS AUN "<<endl;
+		}		
 	    archivo.close();
 
 }
+
 
 bool validarHotel(int codigo, int reg){
 	if(reg != 0){
@@ -89,8 +99,12 @@ void registrarHotel( int &reg, int &posht){
 
 		cout<<"Nombre del hotel: "; cin>>Z[posht].hotel[posht].nombre;
 		Z[posht].hotel[posht].codigo = codigo;
-		cout<<"Vacantes: "; cin>>Z[posht].hotel[posht].vacantes;
-
+		cout<<"Ciudad: "; cin>>Z[posht].hotel[posht].ciudad;
+		cout<<"Habitaciones: "; cin>>Z[posht].hotel[posht].cantidadVacantes;
+		for(int i = 1; i <= Z[posht].hotel[posht].cantidadVacantes; i++){
+			cout<<"Cupos de la habitacion "<< i <<": "; cin>> Z[posht].hotel[posht].vacantes[i];
+		}
+        cout<<"Estrellas: "; cin>>Z[posht].hotel[posht].estrellas;
 		if (Z[posht].hotel[posht].vacantes > 0) {
 			Z[posht].hotel[posht].cupo = 1;
 		}
@@ -126,8 +140,21 @@ void mostrarHoteles( int &reg){
 			cout<<endl;
 			if (Z[i].hotel[i].cupo) {
 				cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre<<endl;
-				cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl;
-				cout<<"Vacantes: "<<Z[i].hotel[i].vacantes<<endl;
+				cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl<<endl;
+				cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
+				cout<<"Habitaciones: "<<endl;
+				for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
+					if(Z[i].hotel[i].vacantes[x] != -1){
+						cout<<"Habitacion "<< x <<": "<< Z[i].hotel[i].vacantes[x]<<endl;
+					}
+					
+					
+				}
+				cout<<endl;
+				cout<<"Estrellas: "; 
+				for(int n = 0; n < Z[i].hotel[i].estrellas; n++) {
+					cout<<"* ";
+				}
 			}
 
 
@@ -140,7 +167,7 @@ void mostrarHoteles( int &reg){
 
 int reserva( int &reg, int &poscl){
 
-	system("CLS"); string nombre, hotel; int edad, sitio, noches; int op, i = 0; bool es = 0; char p;
+	system("CLS"); string nombre, hotel; int edad, sitio, noches, room; int op, i = 0; bool es = 0; char p;
 	char *fecha;
 	time_t tAct = time(NULL);
 	fecha=asctime(localtime(&tAct));
@@ -164,6 +191,7 @@ int reserva( int &reg, int &poscl){
 		if (es) {
 
 			cout<<"Cantidad de noches: "; cin>>noches;
+			cout<<"Que habitacion: "; cin>>room;
 			cout<<"Confirmar reserva? (s/n): "; cin>>p;
 			if (p == 's') {
 				cout<<"Reserva a nombre de "<< Z[usuarioActual].cliente[usuarioActual].nombre<< " confirmada";
@@ -175,13 +203,23 @@ int reserva( int &reg, int &poscl){
 				hotel = Z[sitio].hotel[sitio].nombre;
 				archivo<<"NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo.close();
-				archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<" |FECHA DE RESERVACION: "<<fecha<<endl;
+				archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo.close();
-				//
+				
+				for ( i = 0; i < reg; i++) {
+					if (room == Z[sitio].hotel[sitio].vacantes[i]) {
+						room = i;
+						break;
+					}
+				}
+				
 				Z[usuarioActual].cliente[usuarioActual].hotelReserva[Z[usuarioActual].cliente[usuarioActual].nReserva] = op;
+				Z[usuarioActual].cliente[usuarioActual].habitacion[Z[usuarioActual].cliente[usuarioActual].nReserva] = room;
+				Z[sitio].hotel[sitio].vacantes[room] = -1;
 				Z[usuarioActual].cliente[usuarioActual].nReserva += 1;
+				
 
-				Z[sitio].hotel[sitio].vacantes--;
+				
 				if (Z[sitio].hotel[sitio].vacantes == 0) {
 					Z[sitio].hotel[sitio].cupo = 0;
 				}
@@ -217,12 +255,17 @@ int reserva( int &reg, int &poscl){
 void reservasUsuario(){
 	string line,nombre;
 	ifstream archivo;
+	int cont=0;
 	nombre=Z[usuarioActual].cliente[usuarioActual].nombre;
 	archivo.open(nombre.c_str(), ios::in);
-	while ( getline (archivo,line) )
+	while ( getline (archivo,line))
 	    {
 	      cout << line << endl;
+	      cont++;
 	    }
+	    if(cont<1){
+		cout<<"\t NO HAY RESERVACIONES AUN "<<endl;
+		}
 	    archivo.close();
 }
 
@@ -230,7 +273,6 @@ void registro(){
 	char nombre[40], contrasena[20]; int edad;
 	ofstream archivo;
 	ofstream archivo1;
-	Reintentar:
 	cout<<"\t REGISTRO"<<endl;
 	cout<<"Tu nombre: "; cin>>nombre;
 	cout<<"Contrasena: "; cin>>contrasena;
@@ -240,7 +282,8 @@ void registro(){
 				cout<<"Ya existe un usuario con ese nombre, intente nuevamente"<<endl;
 				system("PAUSE");
 				system("cls");
-				goto Reintentar;
+				break;
+				
 			}
 			else{
 			    strcpy(Z[poscl].cliente[poscl].nombre, nombre);
@@ -252,7 +295,9 @@ void registro(){
 				Z[poscl].cliente[poscl].codigo += 1;
 				poscl++;
 				regus++;
+				cout<<"Registro exitoso"<<endl;
 				break;
+				
 			}
 		}
 	}
@@ -266,10 +311,15 @@ void registro(){
 		Z[poscl].cliente[poscl].codigo += 1;
 		poscl++;
 		regus++;
+		cout<<"Registro exitoso"<<endl;
 	}
 
 
 }
+
+/*void ocultarContraseña(){
+	
+}*/
 
 void login(){
 	char nombre[40], contrasena[20];
@@ -329,6 +379,7 @@ void menuAdmin(){
 				estadoSesion = 0; admin = 0;
 				cout<<"Se ha cerrado sesión"<<endl;
 			}
+			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
 		cout<<endl<<endl;
 		system("PAUSE");
@@ -370,6 +421,7 @@ void menuCliente(){
 				estadoSesion = 0;
 				cout<<"Se ha cerrado sesión"<<endl;
 			}
+			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
 		cout<<endl<<endl;
 		system("PAUSE");
@@ -419,9 +471,10 @@ int main(){
 	}
 	else if(o == 2){
 		registro();
+	    system("Pause");
 		system("cls");
-		dibujar();
 		login();
+		
 	}
 	else if(o == 456){
          admin = 1; estadoSesion = 1;
@@ -439,9 +492,11 @@ int main(){
 		menuAdmin();
 	}
 	else if(estadoSesion){
-        cout<<"Bienvenido "<<Z[usuarioActual].cliente[usuarioActual].nombre<<endl; Sleep(2000);
+		cout<<endl<<endl<<endl;
+        cout<<"\t  \t     Bienvenido "<<Z[usuarioActual].cliente[usuarioActual].nombre<<endl; Sleep(2000);
 		system("cls");
 		menuCliente();
     }
 	return main();
 }
+
