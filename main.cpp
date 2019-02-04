@@ -144,7 +144,7 @@ void mostrarHoteles( int &reg){
 				cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
 				cout<<"Habitaciones: "<<endl;
 				for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
-					if(Z[i].hotel[i].vacantes[x] != -1){
+					if(Z[i].hotel[i].vacantes[x] != 0){
 						cout<<"Habitacion "<< x <<": "<< Z[i].hotel[i].vacantes[x]<<endl;
 					}
 					
@@ -215,7 +215,7 @@ int reserva( int &reg, int &poscl){
 				
 				Z[usuarioActual].cliente[usuarioActual].hotelReserva[Z[usuarioActual].cliente[usuarioActual].nReserva] = op;
 				Z[usuarioActual].cliente[usuarioActual].habitacion[Z[usuarioActual].cliente[usuarioActual].nReserva] = room;
-				Z[sitio].hotel[sitio].vacantes[room] = -1;
+				Z[sitio].hotel[sitio].vacantes[room] = 0;
 				Z[usuarioActual].cliente[usuarioActual].nReserva += 1;
 				
 
@@ -317,7 +317,7 @@ void registro(){
 
 }
 
-/*void ocultarContraseña(){
+/*void ocultarContraseÃ±a(){
 	
 }*/
 
@@ -377,7 +377,7 @@ void menuAdmin(){
 
 			case 8:{
 				estadoSesion = 0; admin = 0;
-				cout<<"Se ha cerrado sesión"<<endl;
+				cout<<"Se ha cerrado sesiÃ³n"<<endl;
 			}
 			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
@@ -419,7 +419,7 @@ void menuCliente(){
 			}
 			case 8:{
 				estadoSesion = 0;
-				cout<<"Se ha cerrado sesión"<<endl;
+				cout<<"Se ha cerrado sesiÃ³n"<<endl;
 			}
 			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
