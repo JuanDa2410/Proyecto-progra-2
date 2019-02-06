@@ -11,6 +11,8 @@
 
 using namespace std;
 
+#define ENTER 13
+
 bool estadoSesion, admin;
 int poscl = 0, regus = 0, usuarioActual, reg = 0,  posht = 0, posvac = 0;
 
@@ -33,7 +35,7 @@ struct stru_cliente{
 	int hotelReserva[10];
 	int habitacion[10];
 	int nReserva;
-	int noches[10];
+
 
 
 };
@@ -157,13 +159,31 @@ bool verCupo(int reg){
 	}
 }
 
+void refrescar(){
+
+	int cont=0;
+	ofstream hab,cup;
+	hab.open("habitaciones_h.txt",ios::out);
+	cup.open("cupos_h.txt",ios::out);
+	while(cont<reg){
+		hab<<Z[cont].hotel[cont].cantidadVacantes<<endl;
+		for(int i = 1; i <= Z[cont].hotel[cont].cantidadVacantes; i++){
+					Z[cont].hotel[cont].vacantes[i];
+					cup<<Z[cont].hotel[cont].vacantes[i]<<endl;
+		}
+
+		cont++;
+
+	}
+}
+
 void mostrarHoteles( int &reg){
   system("CLS");
 	if (verCupo(reg)) {
 		cout<<"\t HOTELES CON CUPO DISPONIBLE: "<<endl;
 		for (int i = 0 ; i < reg; i++) {
 			cout<<endl;
-		if (Z[i].hotel[i].cupo) {
+			if (Z[i].hotel[i].cupo) {
 				cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre<<endl;
 				cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl<<endl;
 				cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
@@ -181,7 +201,8 @@ void mostrarHoteles( int &reg){
 					cout<<"* ";
 				}
 			}
-
+			cout<<endl;
+			cout<<"-------------------------------------------"<<endl<<endl;
 
 		}
 	}
@@ -221,12 +242,12 @@ int reserva( int &reg, int &poscl){
 			if (p == 's') {
 				cout<<"Reserva a nombre de "<< Z[usuarioActual].cliente[usuarioActual].nombre<< " confirmada";
 				cout<<endl;
-				Z[usuarioActual].cliente[usuarioActual].noches[Z[usuarioActual].cliente[usuarioActual].nReserva] = noches;
 				//
 				nombre = Z[usuarioActual].cliente[usuarioActual].nombre;
 				archivo1.open(nombre.c_str(),ios::app);
+				archivo.open("historial.txt",ios::app);
 				hotel = Z[sitio].hotel[sitio].nombre;
-				archivo<<"NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<" |FECHA DE RESERVACION: "<<fecha<<endl;
+				archivo<<"|NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<"|NOCHES:"<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo.close();
 				archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo1.close();
@@ -243,10 +264,20 @@ int reserva( int &reg, int &poscl){
 				Z[sitio].hotel[sitio].vacantes[room] = 0;
 				Z[usuarioActual].cliente[usuarioActual].nReserva += 1;
 
-				if (Z[posht].hotel[posht].vacantes > 0) {
-					Z[posht].hotel[posht].cupo = 1;
+				for(int j=1; j <= Z[sitio].hotel[sitio].cantidadVacantes ;j++){
+						if(Z[sitio].hotel[sitio].vacantes[j] > 0){
+							Z[sitio].hotel[sitio].cupo = 1;
+							break;
+						}
+						else{
+							if(j == Z[sitio].hotel[sitio].cantidadVacantes && Z[sitio].hotel[sitio].vacantes[j]==0){
+								Z[sitio].hotel[sitio].cupo = 0;
+							}
+						}
+
 				}
 
+				refrescar();
 
 			}
 			else{
@@ -294,7 +325,7 @@ void reservasUsuario(){
 }
 
 void registro(){
-	char nombre[40], contrasena[20]; int edad;
+	char nombre[40], contrasena[20]; int edad,i;
 	ofstream archivo;
 	ofstream archivo1;
 	ofstream nreserva;
@@ -302,15 +333,15 @@ void registro(){
 	cout<<"Tu nombre: "; cin>>nombre;
 	cout<<"Contrasena: "; cin>>contrasena;
 	if (regus != 0) {
-		for (int i = 0; i < regus; i++) {
+		for ( i = 0; i < regus; i++) {
 			if (strcmp(nombre, Z[i].cliente[i].nombre) == 0) {
 				cout<<"Ya existe un usuario con ese nombre, intente nuevamente"<<endl;
 				system("PAUSE");
 				system("cls");
 				break;
-
+							}
 			}
-			else{
+			if(i == regus){
 			  strcpy(Z[poscl].cliente[poscl].nombre, nombre);
 				strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
 				Z[poscl].cliente[poscl].nReserva = 0;
@@ -327,9 +358,7 @@ void registro(){
 				cout<<"Registro exitoso"<<endl;
 				archivo.close();
 				archivo1.close();
-				break;
 
-			}
 		}
 	}
 	else{
@@ -351,8 +380,12 @@ void registro(){
 }
 
 /*void ocultarContrasena(char contrasena[20]){
-	char c;
-
+	char c; int i = 0;
+	while((c = getch()) != ENTER){
+		contrasena[i] = c;
+		cout<<"*";
+		i++;
+	}
 }*/
 
 void login(){
@@ -470,8 +503,6 @@ void menuCliente(){
 bool lleno_h = 0;
 
 void llenar_h(int &reg, int &posht){
-	posht=0;
-	reg=0;
 	string s_cod, s_nom, s_ciu, s_hab, s_cup, s_est;
 
 	ifstream cod,nom,ciu,hab,cup,est;
@@ -500,8 +531,18 @@ void llenar_h(int &reg, int &posht){
 	 			Z[posht].hotel[posht].vacantes[i] = s_cup1;
 		}
 		Z[posht].hotel[posht].estrellas = s_est1;
-		if (Z[posht].hotel[posht].cantidadVacantes > 0) {
-			Z[posht].hotel[posht].cupo = 1;
+		for(int j=1; j <= Z[posht].hotel[posht].cantidadVacantes ;j++){
+				if(Z[posht].hotel[posht].vacantes[j] > 0){
+					Z[posht].hotel[posht].cupo = 1;
+					break;
+				}
+				else{
+					if(Z[posht].hotel[posht].cantidadVacantes == j && Z[posht].hotel[posht].vacantes[j]==0){
+						Z[posht].hotel[posht].cupo = 0;
+						break;
+					}
+				}
+
 		}
 		posht++;
 		reg++;
