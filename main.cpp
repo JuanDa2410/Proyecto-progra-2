@@ -69,7 +69,7 @@ void historial(){
 	    }
 	    if(cont<1){
 		cout<<"\t NO HAY RESERVAS AUN "<<endl;
-		}		
+		}
 	    archivo.close();
 
 }
@@ -92,22 +92,43 @@ bool validarHotel(int codigo, int reg){
 }
 
 void registrarHotel( int &reg, int &posht){
+	ofstream cod, nom, ciu, hab, cup,est;
 	int n, codigo;
+
+	cod.open("codigo_h.txt",ios::app);
+	nom.open("nombre_h.txt",ios::app);
+	ciu.open("ciudad_h.txt",ios::app);
+	hab.open("habitaciones_h.txt",ios::app);
+	cup.open("cupos_h.txt",ios::app);
+	est.open("estrellas_h.txt",ios::app);
+
 	cout<<"\t REGISTRAR HOTELES "<<endl;
 	cout<<"Codigo del hotel: "; cin>>codigo;
 	if (validarHotel(codigo, reg)) {
 
 		cout<<"Nombre del hotel: "; cin>>Z[posht].hotel[posht].nombre;
+		nom<<Z[posht].hotel[posht].nombre<<endl;
 		Z[posht].hotel[posht].codigo = codigo;
+		cod<<codigo<<endl;
 		cout<<"Ciudad: "; cin>>Z[posht].hotel[posht].ciudad;
+		ciu<<Z[posht].hotel[posht].ciudad<<endl;
 		cout<<"Habitaciones: "; cin>>Z[posht].hotel[posht].cantidadVacantes;
+		hab<<Z[posht].hotel[posht].cantidadVacantes<<endl;
 		for(int i = 1; i <= Z[posht].hotel[posht].cantidadVacantes; i++){
-			cout<<"Cupos de la habitacion "<< i <<": "; cin>> Z[posht].hotel[posht].vacantes[i];
+					cout<<"Cupos de la habitacion "<< i <<": "; cin>> Z[posht].hotel[posht].vacantes[i];
+					cup<<Z[posht].hotel[posht].vacantes[i]<<endl;
 		}
-        cout<<"Estrellas: "; cin>>Z[posht].hotel[posht].estrellas;
+    cout<<"Estrellas: "; cin>>Z[posht].hotel[posht].estrellas;
+		est<<Z[posht].hotel[posht].estrellas<<endl;
 		if (Z[posht].hotel[posht].vacantes > 0) {
 			Z[posht].hotel[posht].cupo = 1;
 		}
+		cod.close();
+		nom.close();
+		ciu.close();
+		hab.close();
+		cup.close();
+		est.close();
 		posht++; reg++;
 	}
 	else{
@@ -117,14 +138,18 @@ void registrarHotel( int &reg, int &posht){
 }
 
 bool verCupo(int reg){
+	int cont=0;
 	if(reg != 0){
 		for (int i = 0; i < reg; i++) {
 			if (Z[i].hotel[i].cupo) {
-				return 1;
+				cont++;
 			}
 			else{
-				return 0;
+				cont=cont+0;
 			}
+		}
+		if(cont>0){
+			return 1;
 		}
 	}
 	else{
@@ -138,7 +163,7 @@ void mostrarHoteles( int &reg){
 		cout<<"\t HOTELES CON CUPO DISPONIBLE: "<<endl;
 		for (int i = 0 ; i < reg; i++) {
 			cout<<endl;
-			if (Z[i].hotel[i].cupo) {
+		if (Z[i].hotel[i].cupo) {
 				cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre<<endl;
 				cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl<<endl;
 				cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
@@ -147,11 +172,11 @@ void mostrarHoteles( int &reg){
 					if(Z[i].hotel[i].vacantes[x] != 0){
 						cout<<"Habitacion "<< x <<": "<< Z[i].hotel[i].vacantes[x]<<endl;
 					}
-					
-					
-				}
+
+
+			}
 				cout<<endl;
-				cout<<"Estrellas: "; 
+				cout<<"Estrellas: ";
 				for(int n = 0; n < Z[i].hotel[i].estrellas; n++) {
 					cout<<"* ";
 				}
@@ -160,9 +185,9 @@ void mostrarHoteles( int &reg){
 
 		}
 	}
-	else{
+else{
 		cout<<endl<< "NO HAY HOTELES DISPONIBLES EN ESTE MOMENTO"<<endl;
-	}
+}
 }
 
 int reserva( int &reg, int &poscl){
@@ -204,25 +229,24 @@ int reserva( int &reg, int &poscl){
 				archivo<<"NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<" |FECHA DE RESERVACION: "<<fecha<<endl;
 				archivo.close();
 				archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha<<endl;
-				archivo.close();
-				
+				archivo1.close();
+				//
 				for ( i = 0; i < reg; i++) {
 					if (room == Z[sitio].hotel[sitio].vacantes[i]) {
 						room = i;
 						break;
 					}
 				}
-				
+
 				Z[usuarioActual].cliente[usuarioActual].hotelReserva[Z[usuarioActual].cliente[usuarioActual].nReserva] = op;
 				Z[usuarioActual].cliente[usuarioActual].habitacion[Z[usuarioActual].cliente[usuarioActual].nReserva] = room;
 				Z[sitio].hotel[sitio].vacantes[room] = 0;
 				Z[usuarioActual].cliente[usuarioActual].nReserva += 1;
-				
 
-				
-				if (Z[sitio].hotel[sitio].vacantes == 0) {
-					Z[sitio].hotel[sitio].cupo = 0;
+				if (Z[posht].hotel[posht].vacantes > 0) {
+					Z[posht].hotel[posht].cupo = 1;
 				}
+
 
 			}
 			else{
@@ -273,6 +297,7 @@ void registro(){
 	char nombre[40], contrasena[20]; int edad;
 	ofstream archivo;
 	ofstream archivo1;
+	ofstream nreserva;
 	cout<<"\t REGISTRO"<<endl;
 	cout<<"Tu nombre: "; cin>>nombre;
 	cout<<"Contrasena: "; cin>>contrasena;
@@ -283,42 +308,51 @@ void registro(){
 				system("PAUSE");
 				system("cls");
 				break;
-				
+
 			}
 			else{
-			    strcpy(Z[poscl].cliente[poscl].nombre, nombre);
+			  strcpy(Z[poscl].cliente[poscl].nombre, nombre);
 				strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
+				Z[poscl].cliente[poscl].nReserva = 0;
 				archivo.open("usuarios.txt",ios::app);
-	            archivo1.open("pass.txt",ios::app);
+	      archivo1.open("pass.txt",ios::app);
+				nreserva.open("nreserva.txt",ios::app);
+				nreserva<<Z[poscl].cliente[poscl].nReserva<<endl;
 				archivo<<nombre<<endl;
 				archivo1<<contrasena<<endl;
+
 				Z[poscl].cliente[poscl].codigo += 1;
 				poscl++;
 				regus++;
 				cout<<"Registro exitoso"<<endl;
+				archivo.close();
+				archivo1.close();
 				break;
-				
+
 			}
 		}
 	}
 	else{
 		strcpy(Z[poscl].cliente[poscl].nombre, nombre);
-	    strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
+	  strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
 		archivo.open("usuarios.txt",ios::app);
-	    archivo1.open("pass.txt",ios::app);
+	  archivo1.open("pass.txt",ios::app);
 		archivo<<nombre<<endl;
-        archivo1<<contrasena<<endl;
+		archivo1<<contrasena<<endl;
 		Z[poscl].cliente[poscl].codigo += 1;
 		poscl++;
 		regus++;
 		cout<<"Registro exitoso"<<endl;
+		archivo.close();
+		archivo1.close();
 	}
 
 
 }
 
-/*void ocultarContraseña(){
-	
+/*void ocultarContrasena(char contrasena[20]){
+	char c;
+
 }*/
 
 void login(){
@@ -349,7 +383,7 @@ void login(){
 }
 
 void menuAdmin(){
- 
+
 	int op;
 	do{
 		dibujar();
@@ -366,7 +400,7 @@ void menuAdmin(){
 			}
 
 			case 2:{
-				mostrarHoteles( reg);
+				mostrarHoteles(reg);
 				break;
 			}
 
@@ -378,6 +412,7 @@ void menuAdmin(){
 			case 8:{
 				estadoSesion = 0; admin = 0;
 				cout<<"Se ha cerrado sesión"<<endl;
+				break;
 			}
 			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
@@ -413,13 +448,14 @@ void menuCliente(){
 			}
 
 			case 3:{
-                system("cls"); 
+                system("cls");
 				reservasUsuario();
 				break;
 			}
 			case 8:{
 				estadoSesion = 0;
 				cout<<"Se ha cerrado sesión"<<endl;
+				break;
 			}
 			default: cout<<endl<<"Opcion no valida"<<endl;
 		}
@@ -431,19 +467,73 @@ void menuCliente(){
 
 
 }
+bool lleno_h = 0;
+
+void llenar_h(int &reg, int &posht){
+	posht=0;
+	reg=0;
+	string s_cod, s_nom, s_ciu, s_hab, s_cup, s_est;
+
+	ifstream cod,nom,ciu,hab,cup,est;
+
+	cod.open("codigo_h.txt",ios::in);
+	nom.open("nombre_h.txt",ios::in);
+	ciu.open("ciudad_h.txt",ios::in);
+	hab.open("habitaciones_h.txt",ios::in);
+	cup.open("cupos_h.txt",ios::in);
+	est.open("estrellas_h.txt",ios::in);
+	while(getline(nom,s_nom)){
+		getline(cod,s_cod);
+		getline(ciu,s_ciu);
+		getline(hab,s_hab);
+		getline(est,s_est);
+		int s_cod1 = atoi(s_cod.c_str());
+		int s_hab1 = atoi(s_hab.c_str());
+		int s_est1 = atoi(s_est.c_str());
+		Z[posht].hotel[posht].codigo = s_cod1;
+		strcpy(Z[posht].hotel[posht].nombre, s_nom.c_str());
+		strcpy(Z[posht].hotel[posht].ciudad, s_ciu.c_str());
+		Z[posht].hotel[posht].cantidadVacantes = s_hab1;
+		for(int i = 1; i <= Z[posht].hotel[posht].cantidadVacantes; i++){
+				getline(cup,s_cup);
+				int s_cup1 = atoi(s_cup.c_str());
+	 			Z[posht].hotel[posht].vacantes[i] = s_cup1;
+		}
+		Z[posht].hotel[posht].estrellas = s_est1;
+		if (Z[posht].hotel[posht].cantidadVacantes > 0) {
+			Z[posht].hotel[posht].cupo = 1;
+		}
+		posht++;
+		reg++;
+		}
+
+			cod.close();
+			nom.close();
+			ciu.close();
+			hab.close();
+			cup.close();
+			est.close();
+}
+
+
 bool lleno = 0;
 
 void llenar(){
-   string line, line1;
+   string line, line1, s_nre;
+	 int nreserva;
    ifstream archivo;
    ifstream archivo1;
+	 ifstream nreserva1;
+	 nreserva1.open("nreserva.txt", ios::in);
    archivo.open("usuarios.txt" , ios::in);
    archivo1.open("pass.txt", ios::in);
     	while ( getline (archivo,line) )
 	    {
             getline(archivo1,line1);
-              
-            strcpy(Z[poscl].cliente[poscl].nombre, line.c_str());
+						getline(nreserva1,s_nre);
+						int nreserva = atoi(s_nre.c_str());
+			Z[poscl].cliente[poscl].nReserva=nreserva;
+      strcpy(Z[poscl].cliente[poscl].nombre, line.c_str());
 			strcpy(Z[poscl].cliente[poscl].contrasena, line1.c_str());
 			poscl++;
 			regus++;
@@ -457,6 +547,10 @@ int main(){
         llenar();
         lleno=1;
     }
+		if(!lleno_h){
+			llenar_h(reg,posht);
+			lleno_h=1;
+		}
 	int o;
 	Inicio:
 	dibujar();
@@ -474,7 +568,7 @@ int main(){
 	    system("Pause");
 		system("cls");
 		login();
-		
+
 	}
 	else if(o == 456){
          admin = 1; estadoSesion = 1;
@@ -499,4 +593,3 @@ int main(){
     }
 	return main();
 }
-
