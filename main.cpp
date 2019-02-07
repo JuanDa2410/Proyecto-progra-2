@@ -13,6 +13,7 @@ using namespace std;
 
 #define ENTER 13
 void menuCliente();
+void mostrarHoteles();
 bool estadoSesion, admin;
 int poscl = 0, regus = 0, usuarioActual, reg = 0,  posht = 0, posvac = 0;
 
@@ -97,7 +98,7 @@ bool validarHotel(int codigo, int reg){
 
 void registrarHotel( int &reg, int &posht){
 	ofstream cod, nom, ciu, hab, cup,est;
-	int n, codigo;
+	int n, codigo, estrellas;
 
 	cod.open("codigo_h.txt",ios::app);
 	nom.open("nombre_h.txt",ios::app);
@@ -122,8 +123,19 @@ void registrarHotel( int &reg, int &posht){
 					cout<<"Cupos de la habitacion "<< i <<": "; cin>> Z[posht].hotel[posht].vacantes[i];
 					cup<<Z[posht].hotel[posht].vacantes[i]<<endl;
 		}
-    cout<<"Estrellas: "; cin>>Z[posht].hotel[posht].estrellas;
-		est<<Z[posht].hotel[posht].estrellas<<endl;
+		estrellas:
+    cout<<"Estrellas: "; cin>>estrellas;
+		if(estrellas > 5){
+			cout<<"Cantidad de estrellas no valida, solo hasta 5"<<endl;
+			system("Pause");
+			goto estrellas;
+		}
+		else{
+			Z[posht].hotel[posht].estrellas = estrellas;
+			est<<Z[posht].hotel[posht].estrellas<<endl;
+		}
+
+
 		if (Z[posht].hotel[posht].vacantes > 0) {
 			Z[posht].hotel[posht].cupo = 1;
 		}
@@ -164,21 +176,16 @@ bool verCupo(int reg){
 }
 
 void filtro(){
-	if(verCupo(reg)){
-		cout<<"Ciudades registradas: "<<endl; char ciudad[20], op[20]; int n = 1;
+	int op;
+	cout<<"1- Filtrar por estrellas (mayor a menor)"<<endl;
+	cout<<"Tu opcion: "; cin>>op;
+	switch (op) {
+		case 1:{
 
-		for(int i = 1; i <= reg; i++){
-			if(strcmp(ciudad, Z[i+1].hotel[i+1].ciudad) != 0 || i == reg){
-				strcpy(ciudad, Z[i].hotel[i].ciudad);
-				cout<<n<<"- "<<ciudad<<endl;
-				n++;
-
-			}
+			break;
 		}
-		cout<<endl;
-		cout<<"Escoge una ciudad: "; cin>>op;
-		cout<<"Hoteles en "<<op<<endl;
 	}
+
 }
 
 void refrescar(){
@@ -201,7 +208,7 @@ void refrescar(){
 	}
 }
 
-void mostrarHoteles( int &reg){
+void mostrarHoteles(){
   system("CLS");
 
 		cout<<"\t HOTELES CON CUPO DISPONIBLE: "<<endl;
@@ -213,10 +220,10 @@ void mostrarHoteles( int &reg){
 				cout<<"Habitaciones: "<<endl;
 				for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
 					if(Z[i].hotel[i].estado[x] == 0){
-						cout<<"Habitacion "<< x <<": "<< Z[i].hotel[i].vacantes[x]<<endl;
+						cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<" Personas"<<endl;
 					}
 					else{
-                cout<<"Habitacion "<< x <<": "<< Z[i].hotel[i].vacantes[x]<<":RESERVADA"<<endl;
+                cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<":RESERVADA"<<endl;
           }
 
 
@@ -244,7 +251,7 @@ int reserva( int &reg, int &poscl){
 	ofstream archivo,archivo1,nombre_c,nombre_h;
 	CodigoHotel:
 	if (verCupo(reg)) {
-		mostrarHoteles(reg);
+		mostrarHoteles();
 		cout<<endl;
 		cout<<"\t MENU DE RESERVA"<<endl;
 		cout<<"Digite el codigo del hotel que desea reservar: "; cin>>op;
@@ -260,7 +267,7 @@ int reserva( int &reg, int &poscl){
 
 			cout<<"Cantidad de noches: "; cin>>noches;
 			cout<<"Que habitacion: "; cin>>room;
-			if (Z[sitio].hotel[sitio].estado[room] == 0) {
+			if (Z[sitio].hotel[sitio].estado[room] == 0 && room <= Z[sitio].hotel[sitio].cantidadVacantes) {
 					cout<<"Confirmar reserva? (s/n): "; cin>>p;
 					if (p == 's') {
 						cout<<"Reserva a nombre de "<< Z[usuarioActual].cliente[usuarioActual].nombre<< " confirmada";
@@ -317,7 +324,7 @@ int reserva( int &reg, int &poscl){
 
 			}
 			else{
-				cout<<"La habitacion ya esta reservada, intente nuevamente"<<endl;
+				cout<<"La habitacion ya esta reservada o no existe, intente nuevamente"<<endl;
 				system("Pause");
 				system("cls");
 				goto CodigoHotel;
@@ -409,9 +416,9 @@ void registro(){
 	}
 	else{
 		strcpy(Z[poscl].cliente[poscl].nombre, nombre);
-        strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
+    strcpy(Z[poscl].cliente[poscl].contrasena, contrasena );
 		archivo.open("usuarios.txt",ios::app);
-	    archivo1.open("pass.txt",ios::app);
+	  archivo1.open("pass.txt",ios::app);
 		archivo<<nombre<<endl;
 		archivo1<<contrasena<<endl;
 		Z[poscl].cliente[poscl].codigo += 1;
@@ -472,7 +479,7 @@ void refrescar_reserva(int op){
     getline(reemplaza1,line1);
 		getline(rem3,lin1);
 		getline(rem4,li1);
-		nuevo1<<line1<<" |ï¿½CANCELADA!"<<endl;
+		nuevo1<<line1<<" |CANCELADA!"<<endl;
 		remp3<<"0"<<endl;
 		remp4<<"0"<<endl;
   }
@@ -562,8 +569,9 @@ int cancelar(){
 					break;
 				}
 			}
-					cout<<nombre_h<<endl;
-					Z[sitio].hotel[sitio].estado[nombre_h] = 0;
+
+			cout<<nombre_h<<endl;
+			Z[sitio].hotel[sitio].estado[nombre_h] = 0;
 			cout<<"cancelacion exitosa:"<<endl;
 			refrescar();
 			refrescar_reserva(op);
@@ -598,7 +606,7 @@ void menuAdmin(){
 			}
 
 			case 2:{
-				mostrarHoteles(reg);
+				mostrarHoteles();
 				break;
 			}
 
@@ -638,7 +646,7 @@ void menuCliente(){
 		switch(op){
 
 			case 1:{
-				mostrarHoteles( reg);
+				mostrarHoteles();
 				break;
 			}
 
@@ -753,14 +761,14 @@ void llenar(){
    archivo1.open("pass.txt", ios::in);
     	while ( getline (archivo,line) )
 	    {
-            getline(archivo1,line1);
-						getline(nreserva1,s_nre);
-						int nreserva = atoi(s_nre.c_str());
-			Z[poscl].cliente[poscl].nReserva=nreserva;
-      strcpy(Z[poscl].cliente[poscl].nombre, line.c_str());
-			strcpy(Z[poscl].cliente[poscl].contrasena, line1.c_str());
-			poscl++;
-			regus++;
+        getline(archivo1,line1);
+				getline(nreserva1,s_nre);
+				int nreserva = atoi(s_nre.c_str());
+				Z[poscl].cliente[poscl].nReserva=nreserva;
+	      strcpy(Z[poscl].cliente[poscl].nombre, line.c_str());
+				strcpy(Z[poscl].cliente[poscl].contrasena, line1.c_str());
+				poscl++;
+				regus++;
 	    }
 	    archivo.close();
 }
@@ -800,7 +808,7 @@ int main(){
 	else if (o >= 3 || o <= 0) {
 		cout<<"Opcion no valida, intente de nuevo"<<endl;
 		system("PAUSE");
-		system("cls"); 
+		system("cls");
 		goto Inicio;
 	}
 	system("cls");
