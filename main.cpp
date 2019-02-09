@@ -46,6 +46,7 @@ struct stru_hoteles{
 	char nombre[20];
 	int cantidadVacantes;
 	int vacantes[20];
+	int precio[20];
 	bool cupo;
 	char ciudad[20];
 	int estrellas;
@@ -69,7 +70,7 @@ void historial(){
 	archivo.open("historial.txt" , ios::in);
 	while ( getline (archivo,line) )
 	    {
-	      cout << line << endl;
+	      cout << line << endl <<endl;
 	      cont++;
 	    }
 	    if(cont<1){
@@ -97,14 +98,15 @@ bool validarHotel(int codigo, int reg){
 }
 
 void registrarHotel( int &reg, int &posht){
-	ofstream cod, nom, ciu, hab, cup,est;
-	int n, codigo, estrellas;
+	ofstream cod, nom, ciu, hab, cup,est,pre;
+	int n, codigo, estrellas,_precio;
 
 	cod.open("codigo_h.txt",ios::app);
 	nom.open("nombre_h.txt",ios::app);
 	ciu.open("ciudad_h.txt",ios::app);
 	hab.open("habitaciones_h.txt",ios::app);
 	cup.open("cupos_h.txt",ios::app);
+	pre.open("precio_h.txt",ios::app);
 	est.open("estrellas_h.txt",ios::app);
 
 	cout<<"\t REGISTRAR HOTELES "<<endl;
@@ -122,6 +124,8 @@ void registrarHotel( int &reg, int &posht){
 		for(int i = 1; i <= Z[posht].hotel[posht].cantidadVacantes; i++){
 					cout<<"Cupos de la habitacion "<< i <<": "; cin>> Z[posht].hotel[posht].vacantes[i];
 					cup<<Z[posht].hotel[posht].vacantes[i]<<endl;
+					cout<<"Precio de la habitacion "<< i <<": "; cin>>Z[posht].hotel[posht].precio[i];
+					pre<<Z[posht].hotel[posht].precio[i]<<endl;
 		}
 		estrellas:
     cout<<"Estrellas: "; cin>>estrellas;
@@ -176,17 +180,98 @@ bool verCupo(int reg){
 }
 
 void filtro(){
-	int op;
+	int op,op1;
+	string ciud;
+	cout<<"escriba la ciudad a donde desea viajar: ";
+	cin>>ciud;
+	system("cls");
+	cout<<"\t FILTRO DE BUSQUEDA"<<endl<<endl;
 	cout<<"1- Filtrar por estrellas (mayor a menor)"<<endl;
+	cout<<"2- Filtrar por cupos de la habitacion"<<endl;
 	cout<<"Tu opcion: "; cin>>op;
 	switch (op) {
 		case 1:{
+			system("CLS");
+				cout<<"\t HOTELES CON CUPO DISPONIBLE: "<<endl;
+			for(int j = 5; j >0; j--){
+				for (int i = 0 ; i < reg; i++) {
+					if(ciud==Z[i].hotel[i].ciudad && j==Z[i].hotel[i].estrellas){
+						cout<<endl;
+						cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre<<endl;
+						cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl<<endl;
+						cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
+						cout<<"Habitaciones: "<<endl;
+						for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
+							if(Z[i].hotel[i].estado[x] == 0){
+								cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<" Personas: ";
+								cout<<" $ "<<Z[i].hotel[i].precio[x]<<" por noche"<<endl;
+							}
+							else{
+										cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<":RESERVADA"<<endl;
+							}
+
+
+						}
+						cout<<endl;
+						cout<<"Estrellas: ";
+						for(int n = 0; n < Z[i].hotel[i].estrellas; n++) {
+							cout<<"* ";
+						}
+					cout<<endl;
+					cout<<"-------------------------------------------"<<endl<<endl;
+				}
+			}
+		}
 
 			break;
 		}
-	}
+		case 2:{
+			cout<<"Numero de personas que desea por la habitacion: ";
+			cin>>op1;
+			int vec[reg], pre=0,cont=0;
+			system("CLS");
+				cout<<"\t HOTELES CON CUPO DISPONIBLE: "<<endl;
+				for(int n = 0; n < reg; n++){
+					if(ciud==Z[n].hotel[n].ciudad){
+					for(int j = 1; j <= Z[n].hotel[n].cantidadVacantes; j++){
+						if(Z[n].hotel[n].estado[j] == 0 && Z[n].hotel[n].vacantes[j]==op1){
+								vec[cont]=n;
+								cont++;
+								break;
+							}
+						}
+				}
+			}
+				for (int j = 0 ; j < cont; j++) {
+					int i = vec[j];
+						cout<<endl;
+						cout<<"Nombre del hotel: "<<Z[i].hotel[i].nombre<<endl;
+						cout<<"Codigo del hotel: "<<Z[i].hotel[i].codigo<<endl<<endl;
+						cout<<"Ciudad: "<<Z[i].hotel[i].ciudad<<endl;
+						cout<<"Habitaciones: "<<endl;
+						for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
+							if(Z[i].hotel[i].estado[x] == 0){
+								cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<" Personas: ";
+								cout<<" $ "<<Z[i].hotel[i].precio[x]<<" por noche"<<endl;
+							}
+							else{
+										cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<":RESERVADA"<<endl;
+							}
 
-}
+
+						}
+						cout<<endl;
+						cout<<"Estrellas: ";
+						for(int n = 0; n < Z[i].hotel[i].estrellas; n++) {
+							cout<<"* ";
+						}
+					cout<<endl;
+					cout<<"-------------------------------------------"<<endl<<endl;
+				}
+			}
+			break;
+		}
+	}
 
 void refrescar(){
 
@@ -220,11 +305,12 @@ void mostrarHoteles(){
 				cout<<"Habitaciones: "<<endl;
 				for(int x = 1; x <= Z[i].hotel[i].cantidadVacantes ; x++){
 					if(Z[i].hotel[i].estado[x] == 0){
-						cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<" Personas"<<endl;
+						cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<" Personas: ";
+						cout<<" $ "<<Z[i].hotel[i].precio[x]<<" por noche"<<endl;
 					}
 					else{
                 cout<<"Habitacion #"<< x <<": "<< Z[i].hotel[i].vacantes[x]<<":RESERVADA"<<endl;
-          }
+					}
 
 
 				}
@@ -243,7 +329,7 @@ void mostrarHoteles(){
 
 int reserva( int &reg, int &poscl){
 
-	system("CLS"); string nombre, hotel,nom_c,nom_h; int edad, sitio, noches, room; int op, i = 0; bool es = 0; char p;
+	system("CLS"); string nombre, hotel,nom_c,nom_h; int total, edad, sitio, noches, room; int op, i = 0; bool es = 0; char p;
 	char *fecha;
 	time_t tAct = time(NULL);
 	fecha=asctime(localtime(&tAct));
@@ -268,6 +354,8 @@ int reserva( int &reg, int &poscl){
 			cout<<"Cantidad de noches: "; cin>>noches;
 			cout<<"Que habitacion: "; cin>>room;
 			if (Z[sitio].hotel[sitio].estado[room] == 0 && room <= Z[sitio].hotel[sitio].cantidadVacantes) {
+					total=Z[sitio].hotel[sitio].precio[room]*noches;
+					cout<<"Total a pagar: $ "<<total<<endl;
 					cout<<"Confirmar reserva? (s/n): "; cin>>p;
 					if (p == 's') {
 						cout<<"Reserva a nombre de "<< Z[usuarioActual].cliente[usuarioActual].nombre<< " confirmada";
@@ -284,9 +372,9 @@ int reserva( int &reg, int &poscl){
 						nombre_h<<room<<endl;
 						hotel = Z[sitio].hotel[sitio].nombre;
 						Z[sitio].hotel[sitio].estado[room] = 1;
-						archivo<<"|NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<"|NOCHES:"<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha;
+						archivo<<"|NOMBRE: "<<nombre<<" |HOTEL: "<<hotel<<"|NOCHES:"<<noches<<"|HABITACION: "<<room<<"|Total a pagar: "<<total<<" |FECHA DE RESERVACION: "<<fecha;
 						archivo.close();
-						archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<"|HABITACION: "<<room<<" |FECHA DE RESERVACION: "<<fecha;
+						archivo1<<"|HOTEL: "<<hotel<<"|NOCHES: "<<noches<<"|HABITACION: "<<room<<"|Total a pagar: "<<total<<" |FECHA DE RESERVACION: "<<fecha;
 						archivo1.close();
 						nombre_c.close();
 						nombre_h.close();
@@ -611,6 +699,7 @@ void menuAdmin(){
 			}
 
 			case 3:{
+				system("CLS");
 				historial();
 				break;
 			}
@@ -689,15 +778,16 @@ void menuCliente(){
 bool lleno_h = 0;
 
 void llenar_h(int &reg, int &posht){
-	string s_cod, s_nom, s_ciu, s_hab, s_cup, s_est,s_esta;
+	string s_cod, s_nom, s_ciu, s_hab, s_cup, s_pre, s_est,s_esta;
 
-	ifstream cod,nom,ciu,hab,cup,est,esta;
+	ifstream cod,nom,ciu,hab,cup,pre,est,esta;
 
 	cod.open("codigo_h.txt",ios::in);
 	nom.open("nombre_h.txt",ios::in);
 	ciu.open("ciudad_h.txt",ios::in);
 	hab.open("habitaciones_h.txt",ios::in);
 	cup.open("cupos_h.txt",ios::in);
+	pre.open("precio_h.txt",ios::in);
 	est.open("estrellas_h.txt",ios::in);
 	esta.open("estado.txt",ios::in);
 
@@ -715,10 +805,13 @@ void llenar_h(int &reg, int &posht){
 		Z[posht].hotel[posht].cantidadVacantes = s_hab1;
 		for(int i = 1; i <= Z[posht].hotel[posht].cantidadVacantes; i++){
 				getline(cup,s_cup);
+				getline(pre,s_pre);
 				getline(esta,s_esta);
 				int s_cup1 = atoi(s_cup.c_str());
+				int s_pre1 = atoi(s_pre.c_str());
 				int s_esta1 = atoi(s_esta.c_str());
 	 			Z[posht].hotel[posht].vacantes[i] = s_cup1;
+				Z[posht].hotel[posht].precio[i] = s_pre1;
 	 			Z[posht].hotel[posht].estado[i] = s_esta1;
 		}
 		Z[posht].hotel[posht].estrellas = s_est1;
